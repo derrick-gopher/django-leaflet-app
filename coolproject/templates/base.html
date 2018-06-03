@@ -1,0 +1,13 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>Incidences reporter</title>
+        <link rel="stylesheet" href="{{'static', 'css/bootstrap.css'}}">
+    </head>
+    <body>
+        <h1>Welcome to cases reporter</h1>
+        <h4><a href="/report">report</a></h4>
+        {% block content %}
+        {% endblock %}
+    </body>
+</html>
