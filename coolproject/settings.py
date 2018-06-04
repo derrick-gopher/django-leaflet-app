@@ -106,6 +106,7 @@ DATABASES={
 
 DATABASES['default'] = dj_database_url.config()
 DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
+DATABASE_URL ="postgis://USER:postgres@HOST:5432/reporter"
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
