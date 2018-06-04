@@ -26,7 +26,7 @@ SECRET_KEY = 'v49+*cn^c)8!^pp8r9@isn7)-&9th@*@=dk!0p-+6z1xxn))sw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [*]
 
 CORS_ORIGIN_ALLOW_ALL =True
 # Application definition
@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'coolproject.wsgi.application'
 
 DATABASES={
     'default':{
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'ENGINE':' django.contrib.gis.db.backends.postgis',
         'NAME' : 'reporter',
         'USER' : 'postgres',
         'PASSWORD':'postgres',
