@@ -15,6 +15,7 @@ import os
 import dj_database_url
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +27,7 @@ SECRET_KEY = 'v49+*cn^c)8!^pp8r9@isn7)-&9th@*@=dk!0p-+6z1xxn))sw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [*]
+ALLOWED_HOSTS = ['20.20.21.96']
 
 CORS_ORIGIN_ALLOW_ALL =True
 # Application definition
@@ -95,7 +96,7 @@ WSGI_APPLICATION = 'coolproject.wsgi.application'
 
 DATABASES={
     'default':{
-        'ENGINE':' django.contrib.gis.db.backends.postgis',
+        'ENGINE':'django.contrib.gis.db.backends.postgis',
         'NAME' : 'reporter',
         'USER' : 'postgres',
         'PASSWORD':'postgres',
@@ -104,9 +105,6 @@ DATABASES={
     }
 }
 
-db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)
- 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -153,14 +151,12 @@ USE_TZ = True
 
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
-
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-
 MEDIA_URL = '/media/'
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 MEDIA_ROOT = MEDIA_DIR

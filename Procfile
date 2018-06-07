@@ -1,1 +1,1 @@
-web: gunicorn helloapp.wsgi --log-file –
+web: gunicorn bootcamp.wsgi --log-file -
