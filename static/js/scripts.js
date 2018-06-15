@@ -5,7 +5,7 @@ var lyrTopo;
 var lyrWaterColor;
 var lyrOutdoors;
 var lyrSearch;
-var lyrReports;
+var lyrLawyers;
 var lyrMarkerCluster;
 var popZocalo;
 
@@ -27,9 +27,21 @@ var ctlRouting;
 
 var objBasemaps;
 var ObjOverlays;
-var heatmapLayer;
-
+var ctlDraw;
+var drawnItems;
+var animatedMarker;
 var markerCurrentLocation;
+var closest;
+
+var criminalIcn;
+var cilvilIcn;
+var globalGeolocationCoordinates;
+var jsnBuffer;
+
+var coords;
+var lat;
+var lng;
+var pointlyrbuffer;
 $(document).ready(function () {
     mymap = L.map('mapdiv', {
         center: [-0.245, 35.567],
@@ -63,6 +75,10 @@ $(document).ready(function () {
     mymap.addLayer(lyrOSM);
 
 
+
+    // icons
+    criminalIcn =  "/static/img/theater.png",
+    cilvilIcn = "/static/img/museum.png"
     //    **********************overlay layer control ************
 
     objBasemaps = {
@@ -73,100 +89,221 @@ $(document).ready(function () {
         "Watercolor": lyrWaterColor
     };
 
+    drawnItems = new L.FeatureGroup();
+    drawnItems.addTo(mymap);
     //   overlaysvar
+    lyrMarkerCluster = L.markerClusterGroup();
+    lyrLawyers = L.geoJSON.ajax('http://127.0.0.1:8000/data', {
+        pointToLayer: function (feature, latlng) {
+            var attr = feature.properties;
+            if(attr.category == 'criminal'){
+                icon = criminalIcn;
+            }else{
+                icon = cilvilIcn;
+            }
 
-    http: //127.0.0.1:8000/data
-        lyrMarkerCluster = L.markerClusterGroup();
-    lyrReports = L.geoJSON.ajax('http://20.20.21.96:8000/data', {
-        pointToLayer: returnIncidenceMarker
+            return L.marker(latlng, {
+              icon: L.icon({
+                iconUrl: icon,
+                iconSize: [24, 28],
+                iconAnchor: [12, 28],
+                popupAnchor: [0, -25]
+              }),
+              title: feature.properties.NAME,
+              riseOnHover: true
+            });
+          }, 
+          filter:filterByCategory,
+          onEachFeature: function (feature, layer) {
+            var attr = feature.properties;
+            if (attr) {
+              var content = 
+              "<table class='table table-striped table-bordered table-condensed'>" + 
+              "<tr><th>first name</th><td>" + attr.first_name + 
+              "<tr><th>last name</th><td>" + attr.last_name + 
+              "</td></tr>" + "<tr><th>Phone</th><td>" + attr.phone + 
+              "</td></tr>" + "<tr><th>category</th><td>" + attr.category +" lawyer" +
+              "<table>";
+              layer.on({
+                click: function (e) {
+                  layer.bindPopup(content)
+                }
+              });
+            }
+          }
+        
     }).addTo(mymap);
     
 
     // console.log(heat)
     ObjOverlays = {
-        "incidences": lyrReports,
+        "incidences": lyrLawyers,
         "clusters": lyrMarkerCluster,
     }
-
-    lyrReports.on('data:loaded', function(){
-        mymap.fitBounds(lyrReports.getBounds());
-        points = topoints(lyrReports.toGeoJSON());
-        
-        var heat = L.heatLayer(points,{opacity: 0.8,blur:1, gradient: {
-            0.45: "rgb(0,0,255)",
-            0.55: "rgb(0,255,255)",
-            0.65: "rgb(0,255,0)",
-            0.95: "rgb(255,255,0)",
-            1.0: "rgb(255,0,0)"
-            }}).addTo(mymap);
-
-     });
-   
-    function topoints(x){
-        var data = []
-        for (var i=0; i<x.features.length;i++){
-            data.push([x.features[i].geometry.coordinates[1],x.features[i].geometry.coordinates[0]])
-        
-        }
-        return data
-    }
-
     
-    // all
-    ctlLayers = L.control.layers(objBasemaps, ObjOverlays).addTo(mymap);
-    lyrReports.on('data:loaded', function () {
-        mymap.fitBounds(lyrReports.getBounds());
-        lyrMarkerCluster.addLayer(lyrReports);
-        lyrMarkerCluster.addTo(mymap);
+    lyrLawyers.on('data:loaded', function(){
+        mymap.fitBounds(lyrLawyers.getBounds());
 
     });
-   ctlRouting = L.Routing.control({waypoints:[L.latLng(-0.3978268, 36.9612328),L.latLng(-0.378268, 36.7612328)], router: L.Routing.mapbox('pk.eyJ1IjoiZGVyeSIsImEiOiJjaWY5anJyN3YwMDI5dGNseHoyZzM4Z3R4In0.dToOXYIZ30LH_7VtFbKW4A')}).addTo(mymap);
+
+
+    ctlDraw = new L.Control.Draw({
+        draw : {
+            polyline: false,
+            polygon: false,
+            rectangle: false,
+            circle:false
+        },
+        edit:{
+            featureGroup: drawnItems,
+            remove: true
+        }
+
+    });
+    ctlDraw.addTo(mymap);
+
+
+    
+
+    // all
+    ctlLayers = L.control.layers(objBasemaps, ObjOverlays).addTo(mymap);
+    lyrLawyers.on('data:loaded', function () {
+        mymap.fitBounds(lyrLawyers.getBounds());
+        lyrMarkerCluster.addLayer(lyrLawyers);
+        lyrMarkerCluster.addTo(mymap);
+     
+
+    });
+//    ctlRouting = L.Routing.control({waypoints:[L.latLng(-0.3978268, 36.9612328),L.latLng(-0.378268, 36.7612328)], router: L.Routing.mapbox('pk.eyJ1IjoiZGVyeSIsImEiOiJjaWY5anJyN3YwMDI5dGNseHoyZzM4Z3R4In0.dToOXYIZ30LH_7VtFbKW4A')}).addTo(mymap);
+
+
+    lyrLawyers.on('data:loaded', function(){
+        mymap.fitBounds(lyrLawyers.getBounds());
+        
+
+        $("#geolocate").click(function(){
+            mymap.locate();
+            mymap.on('locationfound', function (e) {
+                coords = e.latlng
+                
+            });
+            if(coords){
+            lat = $("#latitude").attr('value',coords['lat'])
+            lng = $("#longitude").attr('value',coords['lng'])
+            }else{
+                lat = $("#latitude").attr('value',-1.1912899)
+                lng = $("#longitude").attr('value',36.911893299999996)
+            }
+           })
+
+        $('#bufferbtn').click(function(){
+           
+           var bufferval = parseInt($("#bufferradius").val());
+           lat = parseInt($("#latitude").val())
+           lng = parseInt($("#longitude").val())
+        //    var point = turf.point([lng, lat]);
+        var point = {
+            "type": "Feature",
+            "properties": {},
+            "geometry": {
+              "type": "Point",
+              "coordinates": [lng, lat]
+            }
+          };
+           jsnBuffer = turf.buffer(point, bufferval, 'kilometers');
+  
+           pointlyrbuffer = L.geoJSON(jsnBuffer,{style:{color:'black', dashArray:'5,5', fillOpacity:0.3}}).addTo(mymap);
+           lyrLawyers.bringToFront()
+           mymap.fitBounds(pointlyrbuffer.getBounds())
+           
+
+        })
+    });
+   
+
+
+
+
+
+
+
+
+mymap.on('click', function(e){
+    if(closest){
+        closest.remove();
+    }
+    var llRef = e.latlng;
+    var strTable = "<table class='table table-hover'>";
+    strTable += "<tr><th>First name</th><th>second name</th><th>phone</th><th>Distance</th><th>Direction</th></tr>";
+    
+    var nrLawyer= returnClosestlayer(lyrLawyers, llRef);
+    
+    strTable += "<tr><td>"+nrLawyer.att.first_name+"</td><td>"+nrLawyer.att.last_name+"</td><td>"+nrLawyer.att.phone+"</td><td>"+nrLawyer.distance.toFixed(0)+" m</td><td>"+nrLawyer.bearing.toFixed(0)+"</td></tr>";
+    
+    var geolocatemarker = L.marker(e.latlng,{draggable:true}).addTo(mymap).bindPopup(strTable,{maxWidth:600});
+    geolocatemarker.on('dragend',e);
+    // ctlRouting = L.Routing.control({waypoints:[L.latLng(-0.3978268, 36.9612328),L.latLng(-0.378268, 36.7612328)], router: L.Routing.mapbox('pk.eyJ1IjoiZGVyeSIsImEiOiJjaWY5anJyN3YwMDI5dGNseHoyZzM4Z3R4In0.dToOXYIZ30LH_7VtFbKW4A')}).addTo(mymap);
+    closest = L.marker(nrLawyer.latlng).addTo(mymap);
+    });
+
+// will come back to geolocation 
 
     $('#btnLocate').click((event) => {
         mymap.locate();
     });
-    $("#report").click((event) => {
-        alert("please click on the map.")
-        mymap.on("click", (e) => {
-            var popupContent =
-                "<form role='form' id='form' class='form-horizontal'>" +
-                "<div class='form-group'>" +
-                "<label>Date </label" +
-                "<input type='date' id='date'>" +
-                "</div>" +
-                "</form>";
-            L.marker(e.latlng).addTo(mymap).bindPopup(popupContent, {
-                keepInView: true,
-                closeButton: false
-            }).openPopup();
-        })
-    })
+
     mymap.on('locationfound', function (e) {
-        console.log(e);
+
         if (markerCurrentLocation) {
             markerCurrentLocation.remove();
         }
-        markerCurrentLocation = L.circle(e.latlng, {
-            radius: e.accuracy / 2
-        }).addTo(mymap);
-        mymap.setView(e.latlng, 14)
+        var llRef = e.latlng;
+        globalGeolocationCoordinates = e.latlng;
+        var strTable = "<table class='table table-hover'>";
+        strTable += "<tr><th>First name</th><th>second name</th><th>phone</th><th>Distance</th><th>Direction</th></tr>";
+        
+        var nrLawyer= returnClosestlayer(lyrLawyers, llRef);
+        
+        strTable += "<tr><td>"+nrLawyer.att.first_name+"</td><td>"+nrLawyer.att.last_name+"</td><td>"+nrLawyer.att.phone+"</td><td>"+nrLawyer.distance.toFixed(0)+" m</td><td>"+nrLawyer.bearing.toFixed(0)+"</td></tr>";
+        
+        var geolocatemarker = L.marker(e.latlng).addTo(mymap).bindPopup(strTable,{maxWidth:600});
+        var closest = L.marker(nrLawyer.latlng).addTo(mymap);
+    
     });
     mymap.on('locationerror', function (e) {
-        console.log(e);
         alert('location was not found');
     });
 
+    // filter categories
+    function filterByCategory(json){
+        var att = json.properties;
+        var optFilter = $("input[name=fltCategory]:checked").val();
+        if(optFilter == "ALL"){
+            return true
+        }else{
+            return (att.category == optFilter)
+        }
+    }
+    $("input[name=fltCategory]").click(function(){
+        // arEventIDs=[];
+        lyrLawyers.refresh();
+    });
+
+    
 
 
 
 });
 
-function returnIncidenceMarker(json, latlng) {
-    var att = json.properties;
-    return L.circleMarker(latlng, {
-        radius: 10,
-        color: 'red'
-    }).bindTooltip("<h5> Incidence id: " + att.pk +
-        "</h5>" + "<h5> description: " + att.description + "</h5>" + "<h5> Time: " + new Date(att.date) + "</h5>");
 
+function returnClosestlayer(lyrGroup, llRef) {
+    var arLyrs = lyrGroup.getLayers();
+    var nearest = L.GeometryUtil.closestLayer(mymap, arLyrs, llRef);
+    nearest.distance = llRef.distanceTo(nearest.latlng);
+    nearest.bearing = L.GeometryUtil.bearing(llRef, nearest.latlng);
+    if (nearest.bearing<0){
+        nearest.bearing = nearest.bearing+360;
+    }
+    nearest.att = nearest.layer.feature.properties;
+    return nearest;
 }
