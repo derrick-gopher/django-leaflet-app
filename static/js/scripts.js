@@ -6,6 +6,7 @@ var lyrWaterColor;
 var lyrOutdoors;
 var lyrSearch;
 var lyrLawyers;
+var lyrAllLawyers;
 var lyrMarkerCluster;
 var popZocalo;
 
@@ -42,6 +43,8 @@ var coords;
 var lat;
 var lng;
 var pointlyrbuffer;
+
+
 $(document).ready(function () {
     mymap = L.map('mapdiv', {
         center: [-0.245, 35.567],
@@ -92,6 +95,42 @@ $(document).ready(function () {
     drawnItems = new L.FeatureGroup();
     drawnItems.addTo(mymap);
     //   overlaysvar
+
+// all layers
+    lyrAllLawyers = L.geoJSON.ajax('http://127.0.0.1:8000/google_data',
+    {
+        pointToLayer: function(feature, latlng){
+        var att = feature.properties;
+        return L.marker(latlng, {
+            icon: L.icon({
+                iconUrl: att.icon,
+                iconSize: [24, 28],
+                iconAnchor: [12, 28],
+                popupAnchor: [0, -25]
+              }),
+           riseOnHover: true
+        })
+    },
+    onEachFeature: function(feature, layer){
+        var attr = feature.properties;
+            if (attr) {
+              var content = 
+              "<table class='table table-striped table-bordered table-condensed'>" + 
+              "<tr><th>first name</th><td>" + attr.name + 
+              "<tr><th>last name</th><td>" + attr.description + 
+              "</td></tr>" + "<tr><th>Phone</th><td>" + attr.phone + 
+              "</td></tr>" + "<tr><th>category</th><td>" + attr.category +" lawyer" +
+              "<table>";
+              layer.on({
+                click: function (e) {
+                  layer.bindPopup(content)
+                }
+              });
+            }
+
+    }
+}
+).addTo(mymap)
     lyrMarkerCluster = L.markerClusterGroup();
     lyrLawyers = L.geoJSON.ajax('http://127.0.0.1:8000/data', {
         pointToLayer: function (feature, latlng) {
@@ -109,7 +148,6 @@ $(document).ready(function () {
                 iconAnchor: [12, 28],
                 popupAnchor: [0, -25]
               }),
-              title: feature.properties.NAME,
               riseOnHover: true
             });
           }, 
@@ -131,7 +169,6 @@ $(document).ready(function () {
               });
             }
           }
-        
     }).addTo(mymap);
     
 
@@ -139,6 +176,7 @@ $(document).ready(function () {
     ObjOverlays = {
         "incidences": lyrLawyers,
         "clusters": lyrMarkerCluster,
+        'google':lyrAllLawyers
     }
     
     lyrLawyers.on('data:loaded', function(){

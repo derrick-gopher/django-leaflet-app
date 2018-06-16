@@ -27,7 +27,7 @@ SECRET_KEY = 'v49+*cn^c)8!^pp8r9@isn7)-&9th@*@=dk!0p-+6z1xxn))sw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1','10.10.11.94']
 
 CORS_ORIGIN_ALLOW_ALL =True
 # Application definition
@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'lawyer',
     'bootstrap4',
     'bootstrap_toolkit',
-    'corsheaders'
+    'corsheaders',
+    'africastalking'
 ]
 
 MIDDLEWARE = [
@@ -97,7 +98,7 @@ WSGI_APPLICATION = 'coolproject.wsgi.application'
 DATABASES={
     'default':{
         'ENGINE':'django.contrib.gis.db.backends.postgis',
-        'NAME' : 'lawyer',
+        'NAME' : 'lawyer_db',
         'USER' : 'postgres',
         'PASSWORD':'postgres',
         'HOST':'localhost',
@@ -160,3 +161,7 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_DIR = os.path.join(BASE_DIR, 'media')
 MEDIA_ROOT = MEDIA_DIR
+
+CHAT_WS_SERVER_HOST = 'localhost'
+CHAT_WS_SERVER_PORT =  5002
+CHAT_WS_SERVER_PROTOCOL = 'ws'

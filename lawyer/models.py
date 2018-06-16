@@ -13,6 +13,11 @@ class Lawyer(models.Model):
     '''
     creating a profile model for each citizen
     '''
+    categories = (
+        ('civil','civil'),
+        ('criminal', 'criminal')
+        
+    )
     avatar = models.ImageField(upload_to='lawyer_avatar/', blank=True)
     bio = models.TextField()
     user = models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, related_name='lawyer_profile')
@@ -30,8 +35,13 @@ class Lawyer(models.Model):
     class Meta:
         verbose_name_plural = "All Lawyers"
 
+class AllLawyer(models.Model):
+    name = models.CharField(max_length=250)
+    icon = models.CharField(max_length=250)
+    description = models.CharField(max_length=250)
 
-
+    geom = models.PointField(srid=4326)
+    objects=models.GeoManager()
 
 
 # class Report(models.Model):

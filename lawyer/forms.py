@@ -3,7 +3,6 @@ from django.forms import ModelForm
 from .models import Lawyer
 from leaflet.forms.widgets import LeafletWidget
 from leaflet.forms.fields import PointField
-
 class LawyerForm(forms.ModelForm):
     location = PointField()
 
@@ -16,3 +15,6 @@ class DataForm(forms.Form):
     last_name = forms.CharField(max_length=50)
     phone = forms.CharField(max_length=50, required=True)
     coordinates=forms.CharField(max_length=200, required=True)
+
+class MessageForm(forms.Form):
+    message = forms.CharField()

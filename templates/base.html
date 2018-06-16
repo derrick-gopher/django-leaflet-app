@@ -5,6 +5,7 @@
 {% load bootstrap4 %}
 {% bootstrap_css %}
 {% bootstrap_messages %}
+
 <html>
     <head>
             <style>
@@ -55,22 +56,9 @@
         <link rel="stylesheet" href="{% static 'src/plugins/routing/dist/leaflet-routing-machine.css' %}"/>
 
 
-
-      <style>
-          #loading {
-  position: absolute;
-  width: 220px;
-  height: 19px;
-  top: 50%;
-  left: 50%;
-  margin: -10px 0 0 -110px;
-  z-index: 20001;
-}
-
-      </style>
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="container-fluid" style="margin-top: 20vh">
             {% include 'navbar.html' %}
             
                     {% block content %}
@@ -80,8 +68,7 @@
        
         </div>
         
-    </body>
-
+    
     <script src="{% static 'src/leaflet-src.js' %}"></script>
     <script src="{% static 'src/bootstrap/js/bootstrap.js' %}"></script>
     <script src="{% static 'src/jquery-3.2.0.min.js' %}"></script>
@@ -151,4 +138,13 @@
     <script src="{% static 'js/incidences.js' %}"></script>
 
    <script src="http://leaflet.github.io/Leaflet.markercluster/example/realworld.10000.js"></script>
+   <script>
+    var socket = new io.Socket();
+    socket.connect();
+    // etc
+</script>
+   
+   {% block extra_js %}
+   {% endblock %} 
+</body>
 </html>
